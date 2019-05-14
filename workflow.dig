@@ -1,0 +1,39 @@
+_export:
+  itunes_library_xml: ${copied_library_xml_path} 
+  working_dir_path: /tmp/embulk-${session_uuid}
+  tracks_json: ${working_dir_path}/tracks.json
+  playlists_json: ${working_dir_path}/playlists.json
+
+timezone: UTC
+
++prepare_working_dir:
+  sh>: mkdir -p "${working_dir_path}"
+
++prepare_library_copy:
+  sh>: "${prepare_library_copy_cmd}"
+
++backup:
+  _parallel: true
+
+  +do_file_backup:
+    sh>: "${do_file_backup_cmd}"
+
+  +do_bq:
+    +jsonize:
+      _parallel: true
+      +tracks:
+        sh>: cat "${itunes_library_xml}" | plutil -extract 'Tracks' xml1 - -o - | sed -e 's|<date>|<string>|g' -e 's|</date>|</string>|g' | plutil -convert json - -o - | ruby -rjson -e 'j=JSON.parse(STDIN.read);j.each{|k, v| puts JSON.dump(v)}' > "${tracks_json}"
+
+      +playlists:
+        sh>: cat "${itunes_library_xml}" | plutil -extract 'Playlists' xml1 - -o - | sed -e 's|<date>|<string>|g' -e 's|</date>|</string>|g' -e 's|<data>|<string>|g' -e 's|</data>|</string>|g' | plutil -convert json - -o - | ruby tidy_playlists_json.rb > "${playlists_json}" 
+
+    +load_bq:
+      _parallel: true
+      +tracks:
+        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" in_path_prefix="${tracks_json}" embulk -J-Xmx8g run itunes_tracks.yml.liquid
+      
+      +playlists:
+        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" in_path_prefix="${playlists_json}" embulk -J-Xmx8g run itunes_playlists.yml.liquid
+
++cleanup:
+  sh>: rm -rf "${working_dir_path}"

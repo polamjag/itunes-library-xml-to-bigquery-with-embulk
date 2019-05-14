@@ -1,0 +1,70 @@
+in:
+  type: file
+  path_prefix: {{ env.in_path_prefix }} 
+  parser:
+    type: json
+    columns:
+      - { element_at: '/Track ID', type: long, name: track_id }
+      - { element_at: '/Size', type: long, name: size }
+      - { element_at: '/Total Time', type: double, name: total_time }
+      - { element_at: '/Disc Number', type: long, name: disc_number }
+      - { element_at: '/Disc Count', type: long, name: disc_count }
+      - { element_at: '/Track Number', type: long, name: track_number }
+      - { element_at: '/Track Count', type: long, name: track_count }
+      - { element_at: '/Year', type: long, name: year }
+      - { element_at: '/Date Modified', type: timestamp, name: date_modified, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { element_at: '/Date Added', type: timestamp, name: date_added, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { element_at: '/Bit Rate', type: long, name: bit_rate }
+      - { element_at: '/Sample Rate', type: long, name: sample_rate }
+      - { element_at: '/Play Count', type: long, name: play_count }
+      - { element_at: '/Play Date UTC', type: timestamp, name: play_date_utc, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { element_at: '/Skip Count', type: long, name: skip_count }
+      - { element_at: '/Skip Date', type: timestamp, name: skip_date, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { element_at: '/Artwork Count', type: long, name: artwork_count }
+      - { element_at: '/Persistent ID', type: string, name: persistent_id }
+      - { element_at: '/Track Type', type: string, name: track_type }
+      - { element_at: '/File Folder Count', type: long, name: file_folder_count }
+      - { element_at: '/Library Folder Count', type: long, name: library_folder_count }
+      - { element_at: '/Name', type: string, name: track_name }
+      - { element_at: '/Sort Name', type: string, name: sort_track_name }
+      - { element_at: '/Artist', type: string, name: artist }
+      - { element_at: '/Sort Artist', type: string, name: sort_artist }
+      - { element_at: '/Album Artist', type: string, name: album_artist} 
+      - { element_at: '/Sort Album Artist', type: string, name: sort_album_artist }
+      - { element_at: '/Album', type: string, name: album }
+      - { element_at: '/Grouping', type: string, name: grouping }
+      - { element_at: '/Genre', type: string, name: genre }
+      - { element_at: '/Composer', type: string, name: composer }
+      - { element_at: '/Kind', type: string, name: kind }
+      - { element_at: '/Location', type: string, name: location }
+      - { element_at: '/Comments', type: string, name: comments }
+      - { element_at: '/Album Rating', type: double, name: album_rating }
+      - { element_at: '/Rating', type: double, name: rating }
+      - { element_at: '/Rating Computed', type: boolean, name: rating_computed }
+      - { element_at: '/Album Rating Computed', type: boolean, name: album_rating_computed }
+      - { element_at: '/Loved', type: boolean, name: loved }
+      - { element_at: '/Compilation', type: boolean, name: compilation }
+      - { element_at: '/Disabled', type: boolean, name: disabled }
+      - { element_at: '/Purchased', type: boolean, name: purchased }
+      - { element_at: '/Explicit', type: boolean, name: explicit }
+
+filters:
+  - type: calc
+    columns:
+      - name: total_time
+        formula: "total_time / 1000.0"
+      - name: album_rating
+        formula: "album_rating / 20.0"
+      - name: rating
+        formula: "rating / 20.0"
+
+out:
+  type: bigquery
+  auth_method: json_key
+  json_keyfile: {{ env.bq_keyfile }}
+  auto_create_table: true
+  mode: REPLACE
+  project: {{ env.bq_project_name }}
+  dataset: {{ env.bq_dataset_name }}
+  table: tracks_%Y%m%d
+  source_format: NEWLINE_DELIMITED_JSON

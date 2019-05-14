@@ -1,0 +1,32 @@
+in:
+  type: file
+  path_prefix: {{ env.in_path_prefix }} 
+  parser:
+    type: json
+    columns:
+      - { element_at: '/Master', type: boolean, name: master }
+      - { element_at: '/Visible', type: boolean, name: visible }
+      - { element_at: '/Playlist Persistent ID', type: string, name: playlist_persistent_id }
+      - { element_at: '/Name', type: string, name: name }
+      - { element_at: '/All Items', type: boolean, name: all_items }
+      - { element_at: '/Playlist ID', type: long, name: playlist_id }
+      - { element_at: '/Playlist Items', type: json, name: playlist_items }
+      - { element_at: '/Smart Info', type: string, name: smart_info }
+      - { element_at: '/Smart Criteria', type: string, name: smart_criteria }
+
+out:
+  type: bigquery
+  auth_method: json_key
+  json_keyfile: {{ env.bq_keyfile }}
+  auto_create_table: true
+  mode: REPLACE
+  project: {{ env.bq_project_name }}
+  dataset: {{ env.bq_dataset_name }}
+  table: playlists_%Y%m%d
+  source_format: NEWLINE_DELIMITED_JSON
+  column_options:
+    - name: playlist_items
+      type: RECORD
+      mode: REPEATED
+      fields:
+        - { name: track_id, type: INTEGER }
