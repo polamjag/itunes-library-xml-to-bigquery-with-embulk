@@ -1,0 +1,62 @@
+in:
+  type: file
+  path_prefix: {{ itunes_library_dir }}
+  parser:
+    type: xpath
+    root: //plist/dict[key='Tracks']/dict/dict
+    schema:
+      - { path: 'key[.="Track ID"]/following-sibling::integer[1]', type: long, name: track_id }
+      - { path: 'key[.="Size"]/following-sibling::integer[1]', type: long, name: size }
+      - { path: 'key[.="Total Time"]/following-sibling::integer[1]', type: double, name: total_time }
+      - { path: 'key[.="Disc Number"]/following-sibling::integer[1]', type: long, name: disc_number }
+      - { path: 'key[.="Disc Count"]/following-sibling::integer[1]', type: long, name: disc_count }
+      - { path: 'key[.="Track Number"]/following-sibling::integer[1]', type: long, name: track_number }
+      - { path: 'key[.="Track Count"]/following-sibling::integer[1]', type: long, name: track_count }
+      - { path: 'key[.="Year"]/following-sibling::integer[1]', type: long, name: year }
+      - { path: 'key[.="Date Modified"]/following-sibling::date[1]', type: timestamp, name: date_modified, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { path: 'key[.="Date Added"]/following-sibling::date[1]', type: timestamp, name: date_added, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { path: 'key[.="Bit Rate"]/following-sibling::integer[1]', type: long, name: bit_rate }
+      - { path: 'key[.="Sample Rate"]/following-sibling::integer[1]', type: long, name: sample_rate }
+      - { path: 'key[.="Play Count"]/following-sibling::integer[1]', type: long, name: play_count }
+      - { path: 'key[.="Play Date UTC"]/following-sibling::date[1]', type: timestamp, name: play_date_utc, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { path: 'key[.="Skip Count"]/following-sibling::integer[1]', type: long, name: skip_count }
+      - { path: 'key[.="Skip Date"]/following-sibling::date[1]', type: timestamp, name: skip_date, format: '%Y-%m-%dT%H:%M:%S%z', timezone: "+0000" }
+      - { path: 'key[.="Artwork Count"]/following-sibling::integer[1]', type: long, name: artwork_count }
+      - { path: 'key[.="Persistent ID"]/following-sibling::string[1]', type: string, name: persistent_id }
+      - { path: 'key[.="Track Type"]/following-sibling::string[1]', type: string, name: track_type }
+      - { path: 'key[.="File Folder Count"]/following-sibling::integer[1]', type: long, name: file_folder_count }
+      - { path: 'key[.="Library Folder Count"]/following-sibling::integer[1]', type: long, name: library_folder_count }
+      - { path: 'key[.="Name"]/following-sibling::string[1]', type: string, name: track_name }
+      - { path: 'key[.="Artist"]/following-sibling::string[1]', type: string, name: artist }
+      - { path: 'key[.="Album Artist"]/following-sibling::string[1]', type: string, name: album_artist }
+      - { path: 'key[.="Album"]/following-sibling::string[1]', type: string, name: album }
+      - { path: 'key[.="Grouping"]/following-sibling::string[1]', type: string, name: grouping }
+      - { path: 'key[.="Genre"]/following-sibling::string[1]', type: string, name: genre }
+      - { path: 'key[.="Composer"]/following-sibling::string[1]', type: string, name: composer }
+      - { path: 'key[.="Kind"]/following-sibling::string[1]', type: string, name: kind }
+      - { path: 'key[.="Location"]/following-sibling::string[1]', type: string, name: location }
+
+      - { path: 'key[.="Comments"]/following-sibling::string[1]', type: string, name: comments }
+
+      - { path: 'key[.="Album Rating"]/following-sibling::integer[1]', type: double, name: album_rating }
+      - { path: 'key[.="Rating"]/following-sibling::integer[1]', type: double, name: rating }
+      
+      - { path: 'key[.="Rating Computed"]/following-sibling::true[1]', type: boolean, name: rating_computed }
+      - { path: 'key[.="Album Rating Computed"]/following-sibling::true[1]', type: boolean, name: album_rating_computed }
+      - { path: 'key[.="Loved"]/following-sibling::true[1]', type: boolean, name: loved }
+      - { path: 'key[.="Compilation"]/following-sibling::true[1]', type: boolean, name: compilation }
+
+      - { path: 'key[.="Disabled"]/following-sibling::true[1]', type: boolean, name: disabled }
+
+      - { path: 'key[.="Purchased"]/following-sibling::true[1]', type: boolean, name: purchased }
+      - { path: 'key[.="Explicit"]/following-sibling::true[1]', type: boolean, name: explicit }
+
+filters:
+  - type: calc
+    columns:
+      - name: total_time
+        formula: "total_time / 1000.0"
+      - name: album_rating
+        formula: "album_rating / 20.0"
+      - name: rating
+        formula: "rating / 20.0"
