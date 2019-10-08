@@ -22,7 +22,7 @@ out:
   mode: REPLACE
   project: {{ env.bq_project_name }}
   dataset: {{ env.bq_dataset_name }}
-  table: playlists_%Y%m%d
+  table: {{ env.bq_playlists_table_name_prefix }}_%Y%m%d
   source_format: NEWLINE_DELIMITED_JSON
   column_options:
     - name: playlist_items

@@ -3,6 +3,8 @@ _export:
   working_dir_path: /tmp/embulk-${session_uuid}
   tracks_json: ${working_dir_path}/tracks.json
   playlists_json: ${working_dir_path}/playlists.json
+  bq_tracks_table_name_prefix: tracks
+  bq_playlists_table_name_prefix: playlists
 
 timezone: UTC
 
@@ -30,10 +32,10 @@ timezone: UTC
     +load_bq:
       _parallel: true
       +tracks:
-        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" in_path_prefix="${tracks_json}" embulk -J-Xmx8g run itunes_tracks.yml.liquid
+        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" bq_tracks_table_name_prefix="${bq_tracks_table_name_prefix}" in_path_prefix="${tracks_json}" embulk -J-Xmx8g run itunes_tracks.yml.liquid
       
       +playlists:
-        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" in_path_prefix="${playlists_json}" embulk -J-Xmx8g run itunes_playlists.yml.liquid
+        sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" bq_playlists_table_name_prefix="${bq_playlists_table_name_prefix}" in_path_prefix="${playlists_json}" embulk -J-Xmx8g run itunes_playlists.yml.liquid
 
 +cleanup:
   sh>: rm -rf "${working_dir_path}"
