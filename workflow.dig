@@ -8,9 +8,6 @@ _export:
 
 timezone: UTC
 
-+prepare_working_dir:
-  sh>: mkdir -p "${working_dir_path}"
-
 +prepare_library_copy:
   sh>: "${prepare_library_copy_cmd}"
 
@@ -21,6 +18,9 @@ timezone: UTC
     sh>: "${do_file_backup_cmd}"
 
   +do_bq:
+    +prepare_working_dir:
+      sh>: mkdir -p "${working_dir_path}"
+
     +jsonize:
       _parallel: true
       +tracks:
@@ -37,5 +37,5 @@ timezone: UTC
       +playlists:
         sh>: bq_keyfile="${bq_keyfile}" bq_project_name="${bq_project_name}" bq_dataset_name="${bq_dataset_name}" bq_playlists_table_name_prefix="${bq_playlists_table_name_prefix}" in_path_prefix="${playlists_json}" embulk -J-Xmx8g run itunes_playlists.yml.liquid
 
-+cleanup:
-  sh>: rm -rf "${working_dir_path}"
+    +cleanup:
+      sh>: rm -rf "${working_dir_path}"
